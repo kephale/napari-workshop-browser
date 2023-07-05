@@ -136,7 +136,7 @@ class WorkshopWidget(QWidget):
 
     def run(self):
         # Hide the original window. This is really wasteful.
-        viewer.window._qt_window.hide()
+        self.viewer.window._qt_window.hide()
 
         from notebook import notebookapp
         from notebook.auth import passwd
