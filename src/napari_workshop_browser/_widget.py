@@ -205,6 +205,12 @@ class WorkshopWidget(QWidget):
                 )
 
         worker = launch_jupyter_notebook()
+
+        def restore_napari():
+            self.viewer.window._qt_window.show()
+
+        worker.finished.connect(restore_napari)
+
         worker.start()
 
 
