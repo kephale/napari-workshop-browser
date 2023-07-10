@@ -13,7 +13,7 @@ def test_workshop_widget(make_napari_viewer, capsys):
     # create our widget, passing in the viewer
     my_widget = WorkshopWidget(viewer)
 
-    viewer.window.add_dock_widget(widget)
+    viewer.window.add_dock_widget(my_widget)
 
     # We only test whether we can instantiate the widget and add to window
     assert my_widget is not None
