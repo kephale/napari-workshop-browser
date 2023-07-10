@@ -130,10 +130,6 @@ class WorkshopWidget(QWidget):
 
         self.layout().addWidget(btn)
 
-    def _on_click(self):
-        print("napari has", len(self.viewer.layers), "layers")
-        self.run()
-
     def run(self):
         # Hide the original window. This is really wasteful.
         self.viewer.window._qt_window.hide()
