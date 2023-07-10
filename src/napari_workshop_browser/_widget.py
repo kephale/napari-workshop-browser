@@ -131,7 +131,6 @@ class WorkshopWidget(QWidget):
         self.layout().addWidget(btn)
 
     def _on_click(self):
-        print("napari has", len(self.viewer.layers), "layers")
         self.run()
 
     def run(self):
@@ -205,6 +204,12 @@ class WorkshopWidget(QWidget):
                 )
 
         worker = launch_jupyter_notebook()
+
+        def restore_napari():
+            self.viewer.window._qt_window.show()
+
+        worker.finished.connect(restore_napari)
+
         worker.start()
 
 
