@@ -68,8 +68,14 @@ def download_and_unzip(url):
     try:
         # Download the zip file
         zip_file_path = os.path.join(temp_dir, "downloaded_file.zip")
-        download_file(url, zip_file_path)
-        print("File successfully downloaded.")
+
+        # Check if this is a URL, if so download
+        if url.startswith("https"):
+            download_file(url, zip_file_path)
+            print("File successfully downloaded.")
+        else:
+            # Otherwise we assume the URL is a local zip path
+            zip_file_path = url
 
         # Extract the zip file
         unzip_file(zip_file_path, temp_dir)
