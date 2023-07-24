@@ -23,7 +23,8 @@ https://napari.org/stable/plugins/index.html
 
 ## How to use this
 
-1. Download napari as an app (e.g. the 0.4.18 release candidates here: https://github.com/napari/packaging/actions/runs/5410466633 or a nightly build from here: https://github.com/napari/napari/releases/tag/latest)
+1. Download napari as an app (e.g. the latest napari releases are
+   available here: https://github.com/napari/napari/releases)
 2. Open napari
 3. Select `Plugins \ Plugin Manager`
 4. Install this plugin, and restart napari.
