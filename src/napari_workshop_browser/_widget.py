@@ -1,11 +1,3 @@
-"""
-This module is an example of a barebones QWidget plugin for napari
-
-It implements the Widget specification.
-see: https://napari.org/stable/plugins/guides.html?#widgets
-
-Replace code below according to your needs.
-"""
 import sys
 import os
 import appdirs
@@ -21,7 +13,6 @@ from qtpy.QtWidgets import (
     QCheckBox,
     QVBoxLayout,
     QLabel,
-    QPlainTextEdit,
 )
 
 from superqt import ensure_main_thread
@@ -30,6 +21,13 @@ from superqt.utils import thread_worker
 if TYPE_CHECKING:
     import napari
 
+# Global list of URLs
+URL_LIST = [
+    "https://github.com/napari/napari-workshop-template/archive/refs/heads/main.zip",
+    "https://github.com/kephale/napari-dl-at-mbl-2024/archive/refs/heads/main.zip",
+    "https://github.com/kephale/napari-workshop-halfway-to-i2k/archive/refs/heads/main.zip",    
+    "https://github.com/kephale/napari-workshop-mandm-2023/archive/refs/heads/main.zip",
+]
 
 def in_notebook():
     try:
@@ -102,18 +100,14 @@ def cleanup_temp_directory(temp_dir):
 
 
 class WorkshopWidget(QWidget):
-    # your QWidget.__init__ can optionally request the napari viewer instance
-    # in one of two ways:
-    # 1. use a parameter called `napari_viewer`, as done here
-    # 2. use a type annotation of 'napari.viewer.Viewer' for any parameter
     def __init__(self, napari_viewer):
         super().__init__()
         self.viewer = napari_viewer
 
-        self.url_textbox = QPlainTextEdit(self)
-        self.url_textbox.appendPlainText(
-            "https://github.com/napari/napari-workshop-template/archive/refs/heads/main.zip"
-        )
+        self.url_combobox = QComboBox(self)
+        self.url_combobox.setEditable(True)
+        self.url_combobox.addItems(URL_LIST)
+        self.url_combobox.setCurrentIndex(0)
 
         self.napari_workshop_template = QComboBox(self)
         self.napari_workshop_template.addItems(["Latest", "None"])
@@ -127,7 +121,7 @@ class WorkshopWidget(QWidget):
         label = QLabel(self)
         label.setText("Workshop zip URL")
         self.layout().addWidget(label)
-        self.layout().addWidget(self.url_textbox)
+        self.layout().addWidget(self.url_combobox)
 
         label = QLabel(self)
         label.setText("Workshop version")
@@ -143,8 +137,10 @@ class WorkshopWidget(QWidget):
         # Hide the original window. This is really wasteful.
         self.viewer.window._qt_window.hide()
 
-        from notebook import notebookapp
-        from notebook.auth import passwd
+        try:
+            from jupyter_server.serverapp import ServerApp as NotebookApp
+        except ImportError:
+            from notebook.notebookapp import NotebookApp
 
         @thread_worker
         @ensure_main_thread
@@ -154,54 +150,37 @@ class WorkshopWidget(QWidget):
                     print("Already running within a Jupyter environment.")
                     return
 
-                # Get the available Jupyter Notebook servers
-                servers = list(notebookapp.list_running_servers())
+                # Get the workshop URL and unzip it
+                workshop_zip_url = self.url_combobox.currentText()
+                notebook_dir = download_and_unzip(workshop_zip_url)
 
-                if len(servers) > 0:
-                    print(
-                        "Jupyter Notebook is already running at the following URLs:"
+                # If 'Latest' is selected, adjust the directory
+                if self.napari_workshop_template.currentText() == "Latest":
+                    repo_archives = [
+                        name
+                        for name in os.listdir(notebook_dir)
+                        if os.path.isdir(os.path.join(notebook_dir, name))
+                        and name.endswith("-main")
+                    ]
+                    notebook_dir = os.path.join(
+                        notebook_dir,
+                        repo_archives[0],
+                        "napari-workshops",
+                        "notebooks",
                     )
-                    for server in servers:
-                        print(server["url"])
-                else:
-                    # Generate a hashed password (optional)
-                    # hashed_password = passwd("napari")
+                    print(f"Notebook dir is {notebook_dir}")
 
-                    workshop_zip_url = (
-                        self.url_textbox.document().toPlainText()
-                    )
+                # Start the Jupyter Notebook server
+                app = NotebookApp.instance()
+                app.open_browser = True
+                app.notebook_dir = notebook_dir
 
-                    notebook_dir = download_and_unzip(workshop_zip_url)
+                os.chdir(notebook_dir)
 
-                    # Currently napari workshop version only changes the assumed directory structure
-                    if self.napari_workshop_template.currentText() == "Latest":
-                        repo_archives = [
-                            name
-                            for name in os.listdir(notebook_dir)
-                            if os.path.isdir(os.path.join(notebook_dir, name))
-                            and name.endswith("-main")
-                        ]
-                        notebook_dir = os.path.join(
-                            notebook_dir,
-                            repo_archives[0],
-                            "napari-workshops",
-                            "notebooks",
-                        )
-                        print(f"Notebook dir is {notebook_dir}")
+                app.initialize()
+                app.start()
 
-                    # Configure the Jupyter Notebook server
-                    app = notebookapp.NotebookApp.instance()
-                    # app.password = hashed_password
-                    app.open_browser = True
-
-                    os.chdir(notebook_dir)
-
-                    # Start the Jupyter Notebook server
-                    app.initialize([])
-
-                    app.start()
-
-                    print("Jupyter Notebook has been launched successfully.")
+                print("Jupyter Notebook has been launched successfully.")
 
             except Exception as e:
                 print(
