@@ -1,56 +1,99 @@
 [build-system]
-requires = ["setuptools>=42.0.0", "wheel"]
+requires = ["setuptools>=61.0.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
+[project]
+name = "napari-workshop-browser"
+dynamic = ["version"]
+description = "A plugin to browse and follow napari workshops"
+readme = "README.md"
+license = { text = "BSD-3-Clause" }
+authors = [
+    { name = "Kyle Harrington", email = "napari@kyleharrington.com" },
+]
+requires-python = ">=3.10"
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Framework :: napari",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: BSD License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Image Processing",
+]
+dependencies = [
+    "numpy",
+    "superqt",
+    "qtpy",
+    "notebook>7",
+    "jupytext",
+    "napari",
+    "appdirs",
+    "requests",
+]
 
+[project.optional-dependencies]
+testing = [
+    "tox",
+    "pytest",
+    "pytest-cov",
+    "pytest-qt",
+    "napari",
+    "pyqt5",
+]
+
+[project.urls]
+"Bug Tracker" = "https://github.com/kephale/napari-workshop-browser/issues"
+"Documentation" = "https://github.com/kephale/napari-workshop-browser#README.md"
+"Source Code" = "https://github.com/kephale/napari-workshop-browser"
+"User Support" = "https://github.com/kephale/napari-workshop-browser/issues"
+
+[project.entry-points."napari.manifest"]
+napari-workshop-browser = "napari_workshop_browser:napari.yaml"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+"*" = ["*.yaml"]
+
+[tool.setuptools.dynamic]
+version = { attr = "napari_workshop_browser.__version__" }
 
 [tool.black]
 line-length = 79
-target-version = ['py38', 'py39', 'py310']
-
 
 [tool.ruff]
 line-length = 79
+target-version = "py310"
+fix = true
+
+[tool.ruff.lint]
 select = [
-    "E", "F", "W", #flake8
-    "UP", # pyupgrade
-    "I", # isort
-    "BLE", # flake8-blind-exception
-    "B", # flake8-bugbear
-    "A", # flake8-builtins
-    "C4", # flake8-comprehensions
-    "ISC", # flake8-implicit-str-concat
-    "G", # flake8-logging-format
-    "PIE", # flake8-pie
-    "SIM", # flake8-simplify
+    "E", "F", "W",
+    "UP",
+    "I",
+    "BLE",
+    "B",
+    "A",
+    "C4",
+    "ISC",
+    "G",
+    "PIE",
+    "SIM",
 ]
 ignore = [
-    "E501", # line too long. let black handle this
-    "UP006", "UP007", # type annotation. As using magicgui require runtime type annotation then we disable this.
-    "SIM117", # flake8-simplify - some of merged with statements are not looking great with black, reanble after drop python 3.9
+    "E501",
+    "UP006", "UP007",
+    "SIM117",
 ]
-
-exclude = [
-    ".bzr",
-    ".direnv",
-    ".eggs",
-    ".git",
-    ".mypy_cache",
-    ".pants.d",
-    ".ruff_cache",
-    ".svn",
-    ".tox",
-    ".venv",
-    "__pypackages__",
-    "_build",
-    "buck-out",
-    "build",
-    "dist",
-    "node_modules",
-    "venv",
-    "*vendored*",
-    "*_vendor*",
-]
-
-target-version = "py38"
-fix = true
